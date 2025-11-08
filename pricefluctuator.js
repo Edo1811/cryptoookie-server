@@ -1,7 +1,7 @@
 // === LOGIN HANDLER ===
 let username = null;
 let playerData = null;
-const SERVER = "https://5938507d-829f-4f48-a35a-529eba66f3f1-00-1fgovj5vv1hca.riker.replit.dev/index.html"; // replace this!
+const SERVER = " https://cryptoookie-net.onrender.com"; // replace this!
 
 async function login() {
   const user = document.getElementById("username").value.trim();
