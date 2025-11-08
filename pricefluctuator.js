@@ -356,6 +356,3 @@ function sellSelected() {
 qtySelect.addEventListener("change", updateActionState);
 // -------------------------------------------
 
-setInterval(fluctuatePrice, 1500);
-updateDisplay();
-drawGraph();
