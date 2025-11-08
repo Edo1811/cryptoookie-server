@@ -58,12 +58,12 @@
 
 <script src="pricefluctuator.js"></script>
 <script>
-  const username = sessionStorage.getItem("username");
-  if (!username) {
+  const currentUser = sessionStorage.getItem("username");
+  if (!currentUser) {
     window.location.href = "login.html";
   } else {
     document.getElementById("gameUI").style.display = "block";
-    console.log("✅ Logged in as", username);
+    console.log("✅ Logged in as", currentUser);
     // reinitialize
     updateDisplay();
     drawGraph();
