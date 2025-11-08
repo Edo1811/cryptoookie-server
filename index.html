@@ -16,7 +16,7 @@
         gap: 10px;
       "
     >
-      <h2>🔐 Login to Cryptoookie</h2>
+      <h2>Login to Cryptoookie</h2>
       <input id="username" placeholder="Username" class="inputBox" />
       <input
         id="password"
@@ -26,7 +26,7 @@
       />
       <button class="btn" onclick="login()">Login</button>
       <p style="color: red; font-size: small; font-style: italic;">
-        WARNING! The game is still under construction and all accounts get wiped when the server resets. The login function is still in early-development and you save might still be easily compromised
+        WARNING! The game is still under construction and all saves get wiped when the server restarts. The login function is still in early-development and your account might still be compromised 
       </p>
     </div>
 
@@ -37,8 +37,8 @@
         Current $COOKIE price: <span id="price">$100.00</span>
       </div>
       <div class="wallet">
-        💵 Balance: $<span id="balance">500.00</span><br />
-        🍪 You own: <span id="cookies">0</span> $COOKIEs
+        Balance: cc<span id="balance">500.00</span>$<br />
+        You own: <span id="cookies">0</span> $COOKIEs
       </div>
 
       <div class="actions">
@@ -58,14 +58,8 @@
       </div>
 
       <canvas id="graph" width="600" height="200"></canvas>
-
-      <p class="description">
-        <strong>What is $COOKIE?</strong><br />
-        $COOKIE is a 100% fake cryptocurrency backed by ✨vibes✨, emotional
-        damage, and the occasional burnt toaster strudel.
-      </p>
-
-      <h2>🍪 Wallet History</h2>
+      
+      <h2>Wallet History</h2>
       <table id="walletTable">
         <thead>
           <tr>
@@ -73,8 +67,8 @@
             <th>Amount</th>
             <th>Price per $COOKIE</th>
             <th>Total Spent</th>
-            <th>⏳ Time Left</th>
-            <th>💀 Status</th>
+            <th>Time Left</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody id="walletBody"></tbody>
