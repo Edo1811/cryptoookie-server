@@ -34,93 +34,105 @@
   </p>
 
   <script>
-    // --- Data loading ---
-    let debts = JSON.parse(localStorage.getItem("debts") || "[]");
-    let balance = parseFloat(localStorage.getItem("balance") || "500");
-    const debtsBody = document.getElementById("debtsBody");
-    const balanceEl = document.getElementById("balance");
+    <script>
+  // === Server and Session Setup ===
+  const SERVER = "https://5938507d-829f-4f48-a35a-529eba66f3f1-00-1fgovj5vv1hca.riker.replit.dev";
 
-    function saveAll() {
-      localStorage.setItem("debts", JSON.stringify(debts));
-      localStorage.setItem("balance", balance.toFixed(2));
-    }
+  const username = sessionStorage.getItem("username");
+  if (!username) window.location.href = "login.html";
 
-    function updateBalance() {
-      balanceEl.textContent = balance.toFixed(2);
-    }
+  let playerData = JSON.parse(sessionStorage.getItem("playerData"));
+  let debts = playerData.debts || [];
+  let balance = playerData.balance || 0;
 
-    // --- Render table ---
-    function renderDebts() {
-      debtsBody.innerHTML = "";
-      if (debts.length === 0) {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td colspan="8">No decayed cookies at the moment.</td>`;
-        debtsBody.appendChild(row);
-        return;
-      }
+  const debtsBody = document.getElementById("debtsBody");
+  const balanceEl = document.getElementById("balance");
 
-      debts.forEach((d, i) => {
-        const status = d.sold ? "Sold" : (d.accruedDebt > 0 ? "Owing" : "Idle");
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${i + 1}</td>
-          <td>${d.type}</td>
-          <td>${d.amount}</td>
-          <td>$${d.currentValue.toFixed(2)}</td>
-          <td>$${d.accruedDebt.toFixed(2)}</td>
-          <td>${status}</td>
-          <td>
-            <button class="btn" onclick="repayDebt(${i})" ${d.sold ? "disabled" : ""}>Repay</button>
-          </td>
-          <td>
-            <button class="btn" onclick="sellCookie(${i})" ${d.accruedDebt > 0 || d.sold ? "disabled" : ""}>Sell</button>
-          </td>
-        `;
-        debtsBody.appendChild(row);
-      });
+  // === Sync player data to backend ===
+  async function savePlayerData() {
+    const player = { ...playerData, balance, debts };
+    await fetch(`${SERVER}/api/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, player }),
+    });
+    sessionStorage.setItem("playerData", JSON.stringify(player));
+  }
+
+  // === Render table ===
+  function updateBalance() {
+    balanceEl.textContent = balance.toFixed(2);
+  }
+
+  function renderDebts() {
+    debtsBody.innerHTML = "";
+    if (debts.length === 0) {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td colspan="8">✅ No decayed cookies at the moment.</td>`;
+      debtsBody.appendChild(row);
       updateBalance();
-      saveAll();
+      return;
     }
 
-    // --- Repay: clears *current* debt only, but it grows again later ---
-    function repayDebt(i) {
-      const d = debts[i];
-      if (d.sold) return;
-      if (balance < d.accruedDebt) {
-        alert("Not enough balance to repay this debt!");
-        return;
-      }
-      balance -= d.accruedDebt;
-      d.accruedDebt = 0;
-      alert(`You repaid debt #${i + 1}. Interest will keep growing until you sell the cookie.`);
-      renderDebts();
-    }
+    debts.forEach((d, i) => {
+      const status = d.sold ? "✅ Sold" : (d.accruedDebt > 0 ? "💀 Owing" : "⏳ Idle");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${d.type}</td>
+        <td>${d.amount}</td>
+        <td>$${d.currentValue.toFixed(2)}</td>
+        <td>$${d.accruedDebt.toFixed(2)}</td>
+        <td>${status}</td>
+        <td>
+          <button class="btn" onclick="repayDebt(${i})" ${d.sold ? "disabled" : ""}>Repay</button>
+        </td>
+        <td>
+          <button class="btn" onclick="sellCookie(${i})" ${d.accruedDebt > 0 || d.sold ? "disabled" : ""}>Sell</button>
+        </td>
+      `;
+      debtsBody.appendChild(row);
+    });
+    updateBalance();
+  }
 
-    // --- Sell cookie once debt fully cleared ---
-    function sellCookie(i) {
-      const d = debts[i];
-      if (d.accruedDebt > 0) {
-        alert("You must repay all debt before selling!");
-        return;
-      }
-      balance += d.currentValue * d.amount;
-      d.sold = true;
-      alert(`Sold ${d.amount}x ${d.type} for $${(d.currentValue * d.amount).toFixed(2)}.`);
-      renderDebts();
-    }
-
-    // --- Accrue debt: 10% per hour (1/360 every 10s for demo) ---
-    setInterval(() => {
-      debts.forEach(d => {
-        if (!d.sold) {
-          const increase = (d.currentValue * 0.1) / 360; // small increments
-          d.accruedDebt += increase;
-        }
-      });
-      renderDebts();
-    }, 10000); // every 10s = 1/360 hour
-
+  // === Repay + Sell ===
+  function repayDebt(i) {
+    const d = debts[i];
+    if (d.sold) return;
+    if (balance < d.accruedDebt) return alert("Not enough balance to repay this debt!");
+    balance -= d.accruedDebt;
+    d.accruedDebt = 0;
+    savePlayerData();
+    alert(`You repaid debt #${i + 1}.`);
     renderDebts();
+  }
+
+  function sellCookie(i) {
+    const d = debts[i];
+    if (d.accruedDebt > 0) return alert("You must repay all debt before selling!");
+    balance += d.currentValue * d.amount;
+    d.sold = true;
+    savePlayerData();
+    alert(`Sold ${d.amount}x ${d.type} for $${(d.currentValue * d.amount).toFixed(2)}.`);
+    renderDebts();
+  }
+
+  // === Debt growth (10% per hour scaled for demo) ===
+  setInterval(() => {
+    debts.forEach(d => {
+      if (!d.sold) {
+        const increase = (d.currentValue * 0.1) / 360;
+        d.accruedDebt += increase;
+      }
+    });
+    renderDebts();
+    savePlayerData();
+  }, 10000);
+
+  renderDebts();
+</script>
+
   </script>
 
 </body>
