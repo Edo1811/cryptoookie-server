@@ -18,9 +18,13 @@ async function login() {
   if (!res.ok) return alert(data.error || "Login failed");
 
   sessionStorage.setItem("username", user);
-  sessionStorage.setItem("playerData", JSON.stringify(data.player));
+sessionStorage.setItem("playerData", JSON.stringify(data.player));
 
+// Give sessionStorage time to commit before redirect
+setTimeout(() => {
   window.location.href = "exchange.html";
+}, 100);
+
 }
 
 
