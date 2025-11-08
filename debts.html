@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>$COOKIE Debts</title>
+  <title>$Cryptoookie Debts</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <h1>💀 Outstanding Debts</h1>
+  <h1>Outstanding Debts</h1>
   <p>Each decayed cookie costs 10% of its current value per hour. Repay to stop interest temporarily — or sell the cookie entirely once fully cleared.</p>
 
   <div class="wallet">
-    💵 Current Balance: $<span id="balance">0.00</span>
+    Current Balance: $<span id="balance">0.00</span>
   </div>
 
   <table id="debtsTable">
@@ -30,7 +30,7 @@
   </table>
 
   <p style="margin-top:20px;">
-    <a href="index.html" class="btn">⬅ Back to Exchange</a>
+    <a href="exchange.html" class="btn">⬅ Back to Exchange</a>
   </p>
 
   <script>
@@ -54,13 +54,13 @@
       debtsBody.innerHTML = "";
       if (debts.length === 0) {
         const row = document.createElement("tr");
-        row.innerHTML = `<td colspan="8">✅ No decayed cookies at the moment.</td>`;
+        row.innerHTML = `<td colspan="8">No decayed cookies at the moment.</td>`;
         debtsBody.appendChild(row);
         return;
       }
 
       debts.forEach((d, i) => {
-        const status = d.sold ? "✅ Sold" : (d.accruedDebt > 0 ? "💀 Owing" : "⏳ Idle");
+        const status = d.sold ? "Sold" : (d.accruedDebt > 0 ? "Owing" : "Idle");
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${i + 1}</td>
