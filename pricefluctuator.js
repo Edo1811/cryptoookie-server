@@ -15,15 +15,14 @@ async function login() {
   });
 
   const data = await res.json();
-  if (!res.ok) {
-    alert(data.error || "Login failed");
-    return;
-  }
+  if (!res.ok) return alert(data.error || "Login failed");
 
-  localStorage.setItem("loggedUser", user);
-  localStorage.setItem("playerData", JSON.stringify(data.player));
-  window.location.href = "exchange.html"; // redirect to game
+  sessionStorage.setItem("username", user);
+  sessionStorage.setItem("playerData", JSON.stringify(data.player));
+
+  window.location.href = "exchange.html";
 }
+
 
 
 // === Auto-save every 10 seconds ===
