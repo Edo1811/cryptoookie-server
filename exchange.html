@@ -56,18 +56,20 @@
       </p>
     </div>
 
-    <script>
+<script src="pricefluctuator.js"></script>
+<script>
   const username = sessionStorage.getItem("username");
   if (!username) {
     window.location.href = "login.html";
   } else {
-    // Load player data from session
-    const playerData = JSON.parse(sessionStorage.getItem("playerData"));
     document.getElementById("gameUI").style.display = "block";
-    console.log("✅ Logged in as", username, "with data:", playerData);
+    console.log("✅ Logged in as", username);
+    // reinitialize
+    updateDisplay();
+    drawGraph();
+    setInterval(fluctuatePrice, 1500);
   }
 </script>
 
-    <script src="pricefluctuator.js"></script>
   </body>
 </html>
