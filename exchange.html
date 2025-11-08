@@ -57,9 +57,17 @@
     </div>
 
     <script>
-      const username = localStorage.getItem("loggedUser");
-      if (!username) window.location.href = "login.html";
-    </script>
+  const username = sessionStorage.getItem("username");
+  if (!username) {
+    window.location.href = "login.html";
+  } else {
+    // Load player data from session
+    const playerData = JSON.parse(sessionStorage.getItem("playerData"));
+    document.getElementById("gameUI").style.display = "block";
+    console.log("✅ Logged in as", username, "with data:", playerData);
+  }
+</script>
+
     <script src="pricefluctuator.js"></script>
   </body>
 </html>
