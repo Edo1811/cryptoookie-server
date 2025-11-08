@@ -20,25 +20,11 @@ async function login() {
     return;
   }
 
-  username = user;
-  playerData = data.player;
-
-  // Load data into game
-  balance = playerData.balance || 500;
-  cookies = playerData.cookies || 0;
-  wallet = playerData.wallet || [];
-  debts = playerData.debts || [];
-
-  // Hide login, show game
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("gameUI").style.display = "block";
-
-  renderWallet();
-  updateDisplay();
-  drawGraph();
-
-  console.log(`✅ Logged in as ${username}`);
+  localStorage.setItem("loggedUser", user);
+  localStorage.setItem("playerData", JSON.stringify(data.player));
+  window.location.href = "exchange.html"; // redirect to game
 }
+
 
 // === Auto-save every 10 seconds ===
 async function autoSave() {
