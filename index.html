@@ -2,34 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>$COOKIE - Totally Real Crypto</title>
+    <title>Login - $COOKIE</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- === LOGIN SCREEN === -->
-    <div
-      id="loginScreen"
-      style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-      "
-    >
+    <div id="loginScreen" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
       <h2>Login to Cryptoookie</h2>
       <input id="username" placeholder="Username" class="inputBox" />
-      <input
-        id="password"
-        type="password"
-        placeholder="Password"
-        class="inputBox"
-      />
+      <input id="password" type="password" placeholder="Password" class="inputBox" />
       <button class="btn" onclick="login()">Login</button>
-      <p style="color: red; font-size: small; font-style: italic;">
-        WARNING! The game is still under construction and all saves get wiped when the server restarts. The login function is still in early-development and your account might still be compromised 
-      </p>
     </div>
-
-   
+    <script src="pricefluctuator.js"></script>
   </body>
 </html>
