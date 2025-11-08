@@ -56,6 +56,10 @@
       </p>
     </div>
 
+    <script>
+      const username = localStorage.getItem("loggedUser");
+      if (!username) window.location.href = "login.html";
+    </script>
     <script src="pricefluctuator.js"></script>
   </body>
 </html>
