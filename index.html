@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>$COOKIE - Totally Real Crypto</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- === LOGIN SCREEN === -->
+    <div
+      id="loginScreen"
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      "
+    >
+      <h2>🔐 Login to Cryptoookie</h2>
+      <input id="username" placeholder="Username" class="inputBox" />
+      <input
+        id="password"
+        type="password"
+        placeholder="Password"
+        class="inputBox"
+      />
+      <button class="btn" onclick="login()">Login</button>
+    </div>
+
+    <!-- === GAME UI === -->
+    <div id="gameUI" style="display: none">
+      <h1>$COOKIE Exchange</h1>
+      <div class="price">
+        Current $COOKIE price: <span id="price">$100.00</span>
+      </div>
+      <div class="wallet">
+        💵 Balance: $<span id="balance">500.00</span><br />
+        🍪 You own: <span id="cookies">0</span> $COOKIEs
+      </div>
+
+      <div class="actions">
+        <div class="select-wrap" role="group" aria-label="Quantity selector">
+          <label for="qtySelect">Qty</label>
+          <select id="qtySelect">
+            <option value="1">1×</option>
+            <option value="10">10×</option>
+            <option value="100">100×</option>
+            <option value="1000">1000×</option>
+            <option value="max">Max</option>
+          </select>
+        </div>
+
+        <button id="buyBtn" class="btn" onclick="buySelected()">Buy</button>
+        <button id="sellBtn" class="btn" onclick="sellSelected()">Sell</button>
+      </div>
+
+      <canvas id="graph" width="600" height="200"></canvas>
+
+      <p class="description">
+        <strong>What is $COOKIE?</strong><br />
+        $COOKIE is a 100% fake cryptocurrency backed by ✨vibes✨, emotional
+        damage, and the occasional burnt toaster strudel.
+      </p>
+
+      <h2>🍪 Wallet History</h2>
+      <table id="walletTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Amount</th>
+            <th>Price per $COOKIE</th>
+            <th>Total Spent</th>
+            <th>⏳ Time Left</th>
+            <th>💀 Status</th>
+          </tr>
+        </thead>
+        <tbody id="walletBody"></tbody>
+      </table>
+
+      <p style="margin-top: 15px">
+        <a href="debts.html" class="btn">View Debts</a>
+      </p>
+    </div>
+
+    <script src="pricefluctuator.js"></script>
+  </body>
+</html>
