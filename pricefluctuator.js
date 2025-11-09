@@ -6,16 +6,39 @@ if (!username) {
 }
 
 
-// === GLOBALS ===
-let balance = 500.0;
+const SERVER = "https://cryptoookie-net.onrender.com";
+
+let balance = 0;
 let cookies = 0;
-let price = 100.0;
-let priceHistory = [price];
 let wallet = [];
 let debts = [];
+let price = 100.0;
+let priceHistory = [price];
 const PRICE_MIN = 10;
 const PRICE_MAX = 1000;
-let logAnchor = Math.log(price); // moving target to avoid sticking to $100
+let playerLoaded = false;
+
+// === Load player data from backend ===
+async function loadPlayer() {
+  const res = await fetch(`${SERVER}/api/player/${username}`);
+  if (!res.ok) {
+    alert("Failed to load player data. Please log in again.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const data = await res.json();
+  balance = data.balance ?? 500;
+  cookies = data.cookies ?? 0;
+  wallet = data.wallet ?? [];
+  debts = data.debts ?? [];
+  renderWallet();
+  updateDisplay();
+  playerLoaded = true;
+}
+
+window.addEventListener("load", loadPlayer);
+
 
 // === INIT PLAYER DATA ON PAGE LOAD ===
 window.addEventListener("load", async () => {
@@ -199,11 +222,17 @@ function drawGraph() {
 }
 
 // === DECAY + DEBTS ===
-const DECAY_DURATION = 60;
+const DECAY_DURATION = 120; // seconds
 
 function tickDecay() {
-  wallet.forEach((entry, i) => {
+  if (!playerLoaded) return;
+
+  let changed = false;
+  wallet.forEach((entry) => {
     if (entry.decayed) return;
+
+    if (entry.decayTime === undefined) entry.decayTime = DECAY_DURATION;
+
     entry.decayTime -= 1;
     if (entry.decayTime <= 0) {
       entry.decayed = true;
@@ -216,12 +245,21 @@ function tickDecay() {
         sold: false,
       });
       cookies -= entry.amount;
-      wallet.splice(i, 1);
-      if (cookies < 0) cookies = 0;
+      changed = true;
     }
   });
-  renderWallet();
+
+  // Remove decayed cookies from wallet
+  wallet = wallet.filter((entry) => !entry.decayed);
+  if (changed) {
+    updateDisplay();
+    renderWallet();
+    savePlayer();
+  }
 }
+
+setInterval(tickDecay, 1000);
+
 
 function renderWallet() {
   walletBody.innerHTML = "";
