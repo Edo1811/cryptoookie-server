@@ -1,13 +1,15 @@
-const SERVER = "https://cryptoookie-net.onrender.com";
-//Login handler here got removed because it messed up everything else here :( Check login.js for the login logic
+// pricefluctuator.js - cleaned and consolidated for backend saves/loads
+const SERVER = "https://cryptoookie-net.onrender.com"; // no leading space!
+
+// session username must be set by login.js
 const username = sessionStorage.getItem("username");
 if (!username) {
   window.location.href = "login.html";
 }
 
+let playerData = null;
 
-const SERVER = "https://cryptoookie-net.onrender.com";
-
+// GAME STATE
 let balance = 0;
 let cookies = 0;
 let wallet = [];
@@ -16,96 +18,79 @@ let price = 100.0;
 let priceHistory = [price];
 const PRICE_MIN = 10;
 const PRICE_MAX = 1000;
+let logAnchor = Math.log(price);
 let playerLoaded = false;
 
-// === Load player data from backend ===
-async function loadPlayer() {
-  const res = await fetch(`${SERVER}/api/player/${username}`);
-  if (!res.ok) {
-    alert("Failed to load player data. Please log in again.");
-    window.location.href = "login.html";
-    return;
-  }
-
-  const data = await res.json();
-  balance = data.balance ?? 500;
-  cookies = data.cookies ?? 0;
-  wallet = data.wallet ?? [];
-  debts = data.debts ?? [];
-  renderWallet();
-  updateDisplay();
-  playerLoaded = true;
-}
-
-window.addEventListener("load", loadPlayer);
-
-
-// === INIT PLAYER DATA ON PAGE LOAD ===
-window.addEventListener("load", async () => {
-  username = sessionStorage.getItem("username");
-  if (!username) {
-    window.location.href = "login.html";
-    return;
-  }
-
-  // Load player data from backend (playerdata.json)
-  try {
-    const res = await fetch(`${SERVER}/api/getPlayer?username=${username}`);
-    if (!res.ok) throw new Error("Failed to load player data");
-    const data = await res.json();
-    playerData = data.player || {};
-
-    balance = playerData.balance || 500;
-    cookies = playerData.cookies || 0;
-    wallet = playerData.wallet || [];
-    debts = playerData.debts || [];
-
-    renderWallet();
-    updateDisplay();
-    drawGraph();
-    setInterval(fluctuatePrice, 1500);
-    setInterval(tickDecay, 1000);
-    setInterval(autoSave, 10000);
-  } catch (err) {
-    console.error("❌ Error loading player data:", err);
-    alert("Error loading your data. Please log in again.");
-    window.location.href = "login.html";
-  }
-});
-
-// === AUTO-SAVE TO BACKEND ===
-async function autoSave() {
-  if (!username) return;
-  const player = { balance, cookies, wallet, debts };
-  try {
-    await fetch(`${SERVER}/api/save`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, player }),
-    });
-    console.log("💾 Player data saved");
-    sessionStorage.setItem("playerData", JSON.stringify(player));
-  } catch (err) {
-    console.warn("⚠️ Auto-save failed:", err);
-  }
-}
-
-// === PRICE FLUCTUATION ===
-function gaussian() {
-  const u1 = Math.random() || 1e-9,
-    u2 = Math.random();
-  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-}
-
+// DOM refs (script should be loaded after HTML)
 const priceEl = document.getElementById("price");
 const balanceEl = document.getElementById("balance");
 const cookiesEl = document.getElementById("cookies");
 const canvas = document.getElementById("graph");
-const ctx = canvas.getContext("2d");
+const ctx = canvas ? canvas.getContext("2d") : null;
 const walletBody = document.getElementById("walletBody");
 const qtySelect = document.getElementById("qtySelect");
 const buyBtn = document.getElementById("buyBtn");
 const sellBtn = document.getElementById("sellBtn");
+
+// ---------- Helper: load player from server ----------
+async function loadPlayer() {
+  try {
+    const res = await fetch(`${SERVER}/api/player/${encodeURIComponent(username)}`);
+    if (!res.ok) throw new Error("Failed to fetch player");
+    const data = await res.json();
+
+    playerData = data || {};
+    balance = playerData.balance ?? 500;
+    cookies = playerData.cookies ?? 0;
+    wallet = playerData.wallet ?? [];
+    debts = playerData.debts ?? [];
+    // ensure wallet entries have decayTime if missing (so tickDecay can decrement)
+    wallet.forEach((w) => {
+      if (w.decayTime === undefined) w.decayTime = DECAY_DURATION;
+      if (w.decayed === undefined) w.decayed = false;
+    });
+
+    playerLoaded = true;
+    renderWallet();
+    updateDisplay();
+    drawGraph();
+
+    // start loops AFTER data load
+    setInterval(fluctuatePrice, 1500);
+    setInterval(tickDecay, 1000);
+    setInterval(autoSave, 10000);
+  } catch (err) {
+    console.error("Error loading player data:", err);
+    alert("Error loading your data. Try logging in again.");
+    sessionStorage.removeItem("username");
+    window.location.href = "login.html";
+  }
+}
+
+// ---------- Auto-save (to backend) ----------
+async function autoSave() {
+  if (!username || !playerLoaded) return;
+  const player = { balance, cookies, wallet, debts };
+  try {
+    const res = await fetch(`${SERVER}/api/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, player }),
+    });
+    if (!res.ok) throw new Error("Save failed");
+    // keep session copy fresh
+    sessionStorage.setItem("playerData", JSON.stringify(player));
+    console.log("💾 Player data saved");
+  } catch (err) {
+    console.warn("Auto-save failed:", err);
+  }
+}
+
+// ---------- Price system ----------
+function gaussian() {
+  const u1 = Math.random() || 1e-9, u2 = Math.random();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
 
 function updateDisplay() {
   if (!priceEl || !balanceEl || !cookiesEl) return;
@@ -116,6 +101,8 @@ function updateDisplay() {
 }
 
 function fluctuatePrice() {
+  if (!playerLoaded) return;
+
   const logMin = Math.log(PRICE_MIN);
   const logMax = Math.log(PRICE_MAX);
   const logRange = logMax - logMin;
@@ -144,12 +131,16 @@ function fluctuatePrice() {
   price = Math.exp(logP);
   priceHistory.push(price);
   if (priceHistory.length > 60) priceHistory.shift();
+
   updateDisplay();
   drawGraph();
 }
 
-// === BUY / SELL ===
+// ---------- Buy / Sell ----------
+const DECAY_DURATION = 60; // seconds
+
 function buyCookie(amount = 1) {
+  if (!playerLoaded) return;
   if (amount <= 0) return;
   const cost = price * amount;
   if (balance >= cost) {
@@ -164,10 +155,14 @@ function buyCookie(amount = 1) {
     });
     renderWallet();
     updateDisplay();
+    autoSave();
+  } else {
+    alert("Not enough balance");
   }
 }
 
 function sellCookie(amount = 1) {
+  if (!playerLoaded) return;
   if (amount <= 0) return;
   if (cookies >= amount) {
     let toSell = amount;
@@ -190,12 +185,13 @@ function sellCookie(amount = 1) {
     if (cookies < 0) cookies = 0;
     renderWallet();
     updateDisplay();
+    autoSave();
   }
 }
 
-// === GRAPH DRAWING ===
+// ---------- Graph drawing ----------
 function drawGraph() {
-  if (!ctx) return;
+  if (!ctx || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const maxPrice = Math.max(...priceHistory);
   const minPrice = Math.min(...priceHistory);
@@ -204,8 +200,7 @@ function drawGraph() {
   ctx.beginPath();
   for (let i = 0; i < priceHistory.length; i++) {
     const x = (i / (priceHistory.length - 1)) * canvas.width;
-    const y =
-      canvas.height - ((priceHistory[i] - minPrice) / range) * canvas.height;
+    const y = canvas.height - ((priceHistory[i] - minPrice) / range) * canvas.height;
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   }
@@ -221,18 +216,14 @@ function drawGraph() {
   ctx.fill();
 }
 
-// === DECAY + DEBTS ===
-const DECAY_DURATION = 120; // seconds
-
+// ---------- Decay & debts ----------
 function tickDecay() {
   if (!playerLoaded) return;
 
   let changed = false;
   wallet.forEach((entry) => {
     if (entry.decayed) return;
-
     if (entry.decayTime === undefined) entry.decayTime = DECAY_DURATION;
-
     entry.decayTime -= 1;
     if (entry.decayTime <= 0) {
       entry.decayed = true;
@@ -249,26 +240,27 @@ function tickDecay() {
     }
   });
 
-  // Remove decayed cookies from wallet
-  wallet = wallet.filter((entry) => !entry.decayed);
+  // remove decayed
+  wallet = wallet.filter((e) => !e.decayed);
+
   if (changed) {
-    updateDisplay();
     renderWallet();
-    savePlayer();
+    updateDisplay();
+    autoSave();
+  } else {
+    // still refresh timer renders
+    renderWallet();
+    updateDisplay();
   }
 }
 
-setInterval(tickDecay, 1000);
-
-
+// ---------- Wallet render ----------
 function renderWallet() {
+  if (!walletBody) return;
   walletBody.innerHTML = "";
   wallet.forEach((entry, index) => {
-    const timeDisplay = entry.decayed
-      ? "💀 Decayed"
-      : `${Math.floor(entry.decayTime)}s`;
+    const timeDisplay = entry.decayed ? "💀 Decayed" : `${Math.floor(entry.decayTime ?? DECAY_DURATION)}s`;
     const status = entry.decayed ? "💀" : "⏳";
-
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${index + 1}</td>
@@ -282,9 +274,9 @@ function renderWallet() {
   });
 }
 
-// === ACTION HELPERS ===
+// ---------- Actions UI ----------
 function getSelectedAmount() {
-  const v = qtySelect.value;
+  const v = qtySelect ? qtySelect.value : "1";
   if (v === "max") return "max";
   const n = parseInt(v, 10);
   return Number.isFinite(n) ? n : 1;
@@ -293,16 +285,12 @@ function getSelectedAmount() {
 function updateActionState() {
   const sel = getSelectedAmount();
   const maxAffordable = Math.floor(balance / price);
-
-  buyBtn.textContent = `Buy ${sel === "max" ? "Max" : sel + "×"}`;
-  sellBtn.textContent = `Sell ${sel === "max" ? "All" : sel + "×"}`;
-
-  const buyDisabled =
-    sel === "max" ? maxAffordable === 0 : balance < price * sel;
+  if (buyBtn) buyBtn.textContent = `Buy ${sel === "max" ? "Max" : sel + "×"}`;
+  if (sellBtn) sellBtn.textContent = `Sell ${sel === "max" ? "All" : sel + "×"}`;
+  const buyDisabled = sel === "max" ? maxAffordable === 0 : balance < price * sel;
   const sellDisabled = sel === "max" ? cookies <= 0 : cookies < sel;
-
-  buyBtn.disabled = buyDisabled;
-  sellBtn.disabled = sellDisabled;
+  if (buyBtn) buyBtn.disabled = buyDisabled;
+  if (sellBtn) sellBtn.disabled = sellDisabled;
 }
 
 function buySelected() {
@@ -325,4 +313,9 @@ function sellSelected() {
   if (amt > 0) sellCookie(amt);
 }
 
-qtySelect.addEventListener("change", updateActionState);
+// wire events if elements exist
+if (qtySelect) qtySelect.addEventListener("change", updateActionState);
+if (window) {
+  // load player once DOM is ready
+  window.addEventListener("load", loadPlayer);
+}
