@@ -3,7 +3,7 @@ const username = sessionStorage.getItem("username");
 if (!username) {
   window.location.href = "login.html";
 }
-
+const SERVER = "https://cryptoookie-net.onrender.com";
 
 // === GLOBALS ===
 let balance = 500.0;
