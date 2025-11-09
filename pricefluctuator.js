@@ -1,30 +1,9 @@
-// === LOGIN HANDLER ===
-let username = null;
-let playerData = null;
-const SERVER = "https://cryptoookie-net.onrender.com"; // make sure no extra spaces!
-
-async function login() {
-  const user = document.getElementById("username").value.trim();
-  const pass = document.getElementById("password").value.trim();
-  if (!user || !pass) return alert("Enter both username and password!");
-
-  const res = await fetch(`${SERVER}/api/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: user, password: pass }),
-  });
-
-  const data = await res.json();
-  if (!res.ok) return alert(data.error || "Login failed");
-
-  sessionStorage.setItem("username", user);
-  sessionStorage.setItem("playerData", JSON.stringify(data.player));
-
-  // Give sessionStorage time to commit before redirect
-  setTimeout(() => {
-    window.location.href = "exchange.html";
-  }, 100);
+// Login handler here got removed because it messed up everything else here :( Check login.js for the login logic
+const username = sessionStorage.getItem("username");
+if (!username) {
+  window.location.href = "login.html";
 }
+
 
 // === GLOBALS ===
 let balance = 500.0;
