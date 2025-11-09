@@ -324,7 +324,4 @@ function sellSelected() {
 
 // wire events if elements exist
 if (qtySelect) qtySelect.addEventListener("change", updateActionState);
-if (window) {
-  // load player once DOM is ready
-  window.addEventListener("load", loadPlayer);
-}
+
