@@ -1,5 +1,4 @@
-// pricefluctuator.js - cleaned and consolidated for backend saves/loads
-const SERVER = "https://cryptoookie-net.onrender.com"; // no leading space!
+const SERVER = "https://cryptoookie-net.onrender.com"; // change this to wwwcryptoookie.net/ or www.cryptoookie.com!!!
 
 // session username must be set by login.js
 const username = sessionStorage.getItem("username");
@@ -8,6 +7,9 @@ if (!username) {
 }
 
 let playerData = null;
+
+// ---------- constants that must exist before loadPlayer uses them ----------
+const DECAY_DURATION = 60; // seconds
 
 // GAME STATE
 let fluctIntervalId = null;
@@ -24,19 +26,38 @@ const PRICE_MAX = 1000;
 let logAnchor = Math.log(price);
 let playerLoaded = false;
 
-// DOM refs (script should be loaded after HTML)
-const priceEl = document.getElementById("price");
-const balanceEl = document.getElementById("balance");
-const cookiesEl = document.getElementById("cookies");
-const canvas = document.getElementById("graph");
-const ctx = canvas ? canvas.getContext("2d") : null;
-const walletBody = document.getElementById("walletBody");
-const qtySelect = document.getElementById("qtySelect");
-const buyBtn = document.getElementById("buyBtn");
-const sellBtn = document.getElementById("sellBtn");
+// DOM refs (we'll initialize inside loadPlayer to ensure DOM is ready)
+let priceEl = null;
+let balanceEl = null;
+let cookiesEl = null;
+let canvas = null;
+let ctx = null;
+let walletBody = null;
+let qtySelect = null;
+let buyBtn = null;
+let sellBtn = null;
+
+// ---------- Helper: get DOM refs (call after DOM ready) ----------
+function initDomRefs() {
+  priceEl = document.getElementById("price");
+  balanceEl = document.getElementById("balance");
+  cookiesEl = document.getElementById("cookies");
+  canvas = document.getElementById("graph");
+  ctx = canvas ? canvas.getContext("2d") : null;
+  walletBody = document.getElementById("walletBody");
+  qtySelect = document.getElementById("qtySelect");
+  buyBtn = document.getElementById("buyBtn");
+  sellBtn = document.getElementById("sellBtn");
+
+  // wire qty change if present
+  if (qtySelect) qtySelect.addEventListener("change", updateActionState);
+}
 
 // ---------- Helper: load player from server ----------
 async function loadPlayer() {
+  // ensure DOM refs exist
+  initDomRefs();
+
   try {
     const res = await fetch(`${SERVER}/api/player/${encodeURIComponent(username)}`);
     if (!res.ok) throw new Error("Failed to fetch player");
@@ -45,9 +66,10 @@ async function loadPlayer() {
     playerData = data || {};
     balance = playerData.balance ?? 500;
     cookies = playerData.cookies ?? 0;
-    wallet = playerData.wallet ?? [];
-    debts = playerData.debts ?? [];
-    // ensure wallet entries have decayTime if missing (so tickDecay can decrement)
+    wallet = Array.isArray(playerData.wallet) ? playerData.wallet : [];
+    debts = Array.isArray(playerData.debts) ? playerData.debts : [];
+
+    // normalize wallet entries so decayTime exists
     wallet.forEach((w) => {
       if (w.decayTime === undefined) w.decayTime = DECAY_DURATION;
       if (w.decayed === undefined) w.decayed = false;
@@ -59,15 +81,13 @@ async function loadPlayer() {
     drawGraph();
 
     // start loops AFTER data load, but guard against duplicates
-if (!fluctIntervalId) {
-  fluctIntervalId = setInterval(fluctuatePrice, 1500);
-}
-if (!decayIntervalId) {
-  decayIntervalId = setInterval(tickDecay, 1000);
-}
-if (!saveIntervalId) {
-  saveIntervalId = setInterval(autoSave, 10000);
-}
+    if (fluctIntervalId) clearInterval(fluctIntervalId);
+    if (decayIntervalId) clearInterval(decayIntervalId);
+    if (saveIntervalId) clearInterval(saveIntervalId);
+
+    fluctIntervalId = setInterval(fluctuatePrice, 1500);
+    decayIntervalId = setInterval(tickDecay, 1000);
+    saveIntervalId = setInterval(autoSave, 10000);
   } catch (err) {
     console.error("Error loading player data:", err);
     alert("Error loading your data. Try logging in again.");
@@ -87,9 +107,8 @@ async function autoSave() {
       body: JSON.stringify({ username, player }),
     });
     if (!res.ok) throw new Error("Save failed");
-    // keep session copy fresh
     sessionStorage.setItem("playerData", JSON.stringify(player));
-    console.log("💾 Player data saved");
+    // console.log("💾 Player data saved");
   } catch (err) {
     console.warn("Auto-save failed:", err);
   }
@@ -110,8 +129,8 @@ function updateDisplay() {
 }
 
 function fluctuatePrice() {
-  if (!playerLoaded) return;
-
+  // allow price to move even if playerLoaded is briefly false (but prefer true)
+  // (no return on playerLoaded so market feels alive while loading)
   const logMin = Math.log(PRICE_MIN);
   const logMax = Math.log(PRICE_MAX);
   const logRange = logMax - logMin;
@@ -146,8 +165,6 @@ function fluctuatePrice() {
 }
 
 // ---------- Buy / Sell ----------
-const DECAY_DURATION = 60; // seconds
-
 function buyCookie(amount = 1) {
   if (!playerLoaded) return;
   if (amount <= 0) return;
@@ -257,7 +274,6 @@ function tickDecay() {
     updateDisplay();
     autoSave();
   } else {
-    // still refresh timer renders
     renderWallet();
     updateDisplay();
   }
@@ -274,8 +290,8 @@ function renderWallet() {
     row.innerHTML = `
       <td>${index + 1}</td>
       <td>${entry.amount}</td>
-      <td>$${entry.priceAtPurchase.toFixed(2)}</td>
-      <td>$${entry.total.toFixed(2)}</td>
+      <td>$${(entry.priceAtPurchase ?? price).toFixed(2)}</td>
+      <td>$${(entry.total ?? (entry.amount * (entry.priceAtPurchase ?? price))).toFixed(2)}</td>
       <td>${timeDisplay}</td>
       <td>${status}</td>
     `;
@@ -322,6 +338,8 @@ function sellSelected() {
   if (amt > 0) sellCookie(amt);
 }
 
-// wire events if elements exist
-if (qtySelect) qtySelect.addEventListener("change", updateActionState);
-
+// ensure we call loadPlayer once when page fully loads
+window.addEventListener("load", () => {
+  // only call once
+  if (!playerLoaded) loadPlayer();
+});
