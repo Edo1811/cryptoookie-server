@@ -1,9 +1,10 @@
-// Login handler here got removed because it messed up everything else here :( Check login.js for the login logic
+const SERVER = "https://cryptoookie-net.onrender.com";
+//Login handler here got removed because it messed up everything else here :( Check login.js for the login logic
 const username = sessionStorage.getItem("username");
 if (!username) {
   window.location.href = "login.html";
 }
-const SERVER = "https://cryptoookie-net.onrender.com";
+
 
 // === GLOBALS ===
 let balance = 500.0;
