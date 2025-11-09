@@ -58,6 +58,7 @@
 
 <script src="pricefluctuator.js"></script>
 <script>
+  clearInterval(fluctIntervalId);
   const currentUser = sessionStorage.getItem("username");
   if (!currentUser) {
     window.location.href = "login.html";
