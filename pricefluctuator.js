@@ -10,6 +10,9 @@ if (!username) {
 let playerData = null;
 
 // GAME STATE
+let fluctIntervalId = null;
+let decayIntervalId = null;
+let saveIntervalId = null;
 let balance = 0;
 let cookies = 0;
 let wallet = [];
@@ -55,10 +58,16 @@ async function loadPlayer() {
     updateDisplay();
     drawGraph();
 
-    // start loops AFTER data load
-    setInterval(fluctuatePrice, 1500);
-    setInterval(tickDecay, 1000);
-    setInterval(autoSave, 10000);
+    // start loops AFTER data load, but guard against duplicates
+if (!fluctIntervalId) {
+  fluctIntervalId = setInterval(fluctuatePrice, 1500);
+}
+if (!decayIntervalId) {
+  decayIntervalId = setInterval(tickDecay, 1000);
+}
+if (!saveIntervalId) {
+  saveIntervalId = setInterval(autoSave, 10000);
+}
   } catch (err) {
     console.error("Error loading player data:", err);
     alert("Error loading your data. Try logging in again.");
