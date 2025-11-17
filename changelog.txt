@@ -1,0 +1,14 @@
+From now on I will document EVERY SINGLE FUCKING CHANGE I MAKE. Oh and btw @CommandB in case you're seeing this, dm me :)
+
+(17/11/25)
+Version Beta 1.1:
+ - Added changelog.txt to the repo
+ - Changed changelog.txt
+ - Told CommandB to dm me
+ - Asked Chatgpt to generate cool cookie images but shes trash at generating stuff tbh
+Checklist for Beta 1.2:
+ - Imma add a temporal indicator and one that shows how much on the graph because rn its pretty useless without knowing what those lines actually mean
+ - Ill also add a moving average, so you dont buy when its low but when its lower than the moving average
+ - Maybe ill add a gew balancing features to avoid ppl tripling and quadrupling their money with a click using the buy max and sell max buttons:
+      Delay when buying $Cookies: 0.1 at 1-10 $Cookies, 0.2 at 10-100 $Cookies, 0.3 at 100-1000 $Cookies, 0.5 for all max buys and anything over 1000 $Cookies
+      And a sell fee: 0% for 1-10 $Cookies sold, 1-2% for 10-100, 3-4% for 100-1000, 5% for any max sell, ($CookiesSold / 200)% for anything over 1000 but it caps at 10%
