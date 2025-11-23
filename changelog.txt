@@ -20,4 +20,5 @@ Version Beta 1.1.2
  - Added a temporal indicator for the graph in exchange.html and pricefluctuator.js
  - Added another indicator for the price (still in exchange.html and pricefluctuator.js)
  >> Bug where two canvasses were created, solved by removing a single line of code :moyai:
+ >> Another bug where the canvas WASNT CENTERED UGH, solved tho :3
  - Modified both indicators because they were ass and looked horrible so now there should be better ones, hopefully readable
