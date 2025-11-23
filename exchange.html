@@ -41,14 +41,14 @@
           style="border-radius: 12px; background: white;"></canvas>
 
   <!-- Price Labels (absolute, left of graph) -->
-  <div id="priceLabels"
-       style="position: absolute; left: -65px; top: 0; 
-              width: 60px; text-align: right;
-              font-family: monospace; font-size: 13px; color:#555;">
-    <div id="labelMax"></div>
-    <div id="labelMed" style="position:absolute; top: 90px;"></div>
-    <div id="labelMin" style="position:absolute; bottom: 0;"></div>
-  </div>
+<div id="priceLabels"
+     style="position: absolute; left: -65px; top: 0; width: 60px; text-align: right;
+            font-family: monospace; font-size: 13px; color:#555; pointer-events:none;">
+  <div id="labelMax" style="position:absolute;"></div>
+  <div id="labelMed" style="position:absolute;"></div>
+  <div id="labelMin" style="position:absolute;"></div>
+</div>
+
 
   <!-- Time Labels (absolute, below graph) -->
   <div style="position: absolute; width: 100%; bottom: -20px; 
