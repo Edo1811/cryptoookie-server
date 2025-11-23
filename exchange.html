@@ -34,29 +34,26 @@
         <button id="sellBtn" class="btn" onclick="sellSelected()">Sell</button>
       </div>
 
-      <!-- Graph container -->
-<div id="graphWrapper" style="width: 700px; margin: 0 auto;">
+  <div style="position: relative; width: 600px; margin: 0 auto;">
 
-  <div style="display: flex; align-items: center; gap: 10px;">
+  <!-- Graph -->
+  <canvas id="graph" width="600" height="200"
+          style="border-radius: 12px; background: white;"></canvas>
 
-    <!-- Price indicators (left side) -->
-    <div id="priceLabels" 
-        style="text-align: right; width: 60px; font-family: monospace; font-size: 13px; line-height: 1.5;">
-      <div id="labelMax"></div>
-      <div id="labelMed" style="margin-top: 50px;"></div>
-      <div id="labelMin" style="margin-top: 50px;"></div>
-    </div>
-
-    <!-- Graph canvas -->
-    <canvas id="graph" width="600" height="200"
-            style="border-radius: 12px; background: white;"></canvas>
-
+  <!-- Price Labels (absolute, left of graph) -->
+  <div id="priceLabels"
+       style="position: absolute; left: -65px; top: 0; 
+              width: 60px; text-align: right;
+              font-family: monospace; font-size: 13px; color:#555;">
+    <div id="labelMax"></div>
+    <div id="labelMed" style="position:absolute; top: 90px;"></div>
+    <div id="labelMin" style="position:absolute; bottom: 0;"></div>
   </div>
 
-  <!-- Time axis -->
-  <div style="display: flex; justify-content: space-between; 
-              margin-left: 60px; margin-top: 4px; 
-              width: 600px; font-family: monospace; font-size: 13px; color:#777;">
+  <!-- Time Labels (absolute, below graph) -->
+  <div style="position: absolute; width: 100%; bottom: -20px; 
+              display:flex; justify-content: space-between;
+              font-family: monospace; font-size: 13px; color:#777;">
     <span>60s ago</span>
     <span style="margin-right: 8px;">Now</span>
   </div>
