@@ -34,7 +34,27 @@
         <button id="sellBtn" class="btn" onclick="sellSelected()">Sell</button>
       </div>
 
-      <canvas id="graph" width="600" height="200"></canvas>
+      <div style="display: flex; align-items: center; gap: 10px;">
+
+  <!-- Price indicators (left side) -->
+  <div id="priceLabels" style="text-align: right; font-family: monospace; font-size: 13px; line-height: 1.5;">
+    <div id="labelMax"></div>
+    <div id="labelMed" style="margin-top: 50px;"></div>
+    <div id="labelMin" style="margin-top: 50px;"></div>
+  </div>
+
+  <!-- Graph -->
+  <canvas id="graph" width="600" height="200"
+          style="border-radius: 12px; background: white;"></canvas>
+
+  </div>
+
+  <!-- Time indicators -->
+  <div style="display:flex; justify-content: space-between; width: 620px; padding-left: 40px; font-family: monospace; font-size: 13px; color:#777;">
+    <span>60s ago</span>
+    <span>Now</span>
+  </div>
+  <canvas id="graph" width="600" height="200"></canvas>
       
       <h2>Wallet History</h2>
       <table id="walletTable">
