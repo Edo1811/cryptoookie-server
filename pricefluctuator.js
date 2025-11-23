@@ -216,6 +216,7 @@ function sellCookie(amount = 1) {
 }
 
 // ---------- Graph drawing ---------- - This function lately got replaced, so if there are bugs they are most likely here lol
+//                                    >> Hello, jack. It works but its ass imma make it more readable now and have the indicators outside. Btw youre fired
 function drawGraph() {
   if (!ctx || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -223,43 +224,21 @@ function drawGraph() {
   const w = canvas.width;
   const h = canvas.height;
 
-  // Padding for axes
-  const padLeft = 50;
-  const padBottom = 20;
-
-  // Compute min/max
   const maxPrice = Math.max(...priceHistory);
   const minPrice = Math.min(...priceHistory);
+  const medPrice = (maxPrice + minPrice) / 2;
   const range = maxPrice - minPrice || 1;
 
-  // ---- DRAW PRICE AXIS ----
-  ctx.strokeStyle = "#888";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(padLeft, 0);
-  ctx.lineTo(padLeft, h - padBottom);
-  ctx.stroke();
+  // === UPDATE LABELS (outside the graph) ===
+  document.getElementById("labelMax").textContent = `$${maxPrice.toFixed(2)}`;
+  document.getElementById("labelMed").textContent = `$${medPrice.toFixed(2)}`;
+  document.getElementById("labelMin").textContent = `$${minPrice.toFixed(2)}`;
 
-  // Labels: top price + bottom price
-  ctx.fillStyle = "#ccc";
-  ctx.font = "12px monospace";
-  ctx.fillText(`$${maxPrice.toFixed(2)}`, 5, 12);
-  ctx.fillText(`$${minPrice.toFixed(2)}`, 5, h - padBottom - 5);
-
-  // ---- DRAW TIME AXIS ----
-  ctx.beginPath();
-  ctx.moveTo(padLeft, h - padBottom);
-  ctx.lineTo(w, h - padBottom);
-  ctx.stroke();
-
-  ctx.fillText("60s ago", padLeft + 5, h - 5);
-  ctx.fillText("Now", w - 40, h - 5);
-
-  // ---- DRAW PRICE LINE ----
+  // ---- DRAW GRAPH ----
   ctx.beginPath();
   for (let i = 0; i < priceHistory.length; i++) {
-    const x = padLeft + (i / (priceHistory.length - 1)) * (w - padLeft);
-    const y = (h - padBottom) - ((priceHistory[i] - minPrice) / range) * (h - padBottom);
+    const x = (i / (priceHistory.length - 1)) * w;
+    const y = h - ((priceHistory[i] - minPrice) / range) * h;
 
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
@@ -269,14 +248,16 @@ function drawGraph() {
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // ---- Highlight latest point ----
-  const lastX = w - 2;
-  const lastY = (h - padBottom) - ((price - minPrice) / range) * (h - padBottom);
+  // --- Draw the latest point ---
+  const x = w - 2;
+  const y = h - ((price - minPrice) / range) * h;
+
   ctx.fillStyle = "#ff9900";
   ctx.beginPath();
-  ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+  ctx.arc(x, y, 4, 0, Math.PI * 2);
   ctx.fill();
 }
+
 
 
 // ---------- Decay & debts ----------
