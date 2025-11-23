@@ -229,10 +229,23 @@ function drawGraph() {
   const medPrice = (maxPrice + minPrice) / 2;
   const range = maxPrice - minPrice || 1;
 
-  // === UPDATE LABELS (outside the graph) ===
-  document.getElementById("labelMax").textContent = `$${maxPrice.toFixed(2)}`;
-  document.getElementById("labelMed").textContent = `$${medPrice.toFixed(2)}`;
-  document.getElementById("labelMin").textContent = `$${minPrice.toFixed(2)}`;
+  // === UPDATE LABEL TEXT ===
+const maxLabel = document.getElementById("labelMax");
+const medLabel = document.getElementById("labelMed");
+const minLabel = document.getElementById("labelMin");
+
+maxLabel.textContent = `$${maxPrice.toFixed(2)}`;
+medLabel.textContent = `$${medPrice.toFixed(2)}`;
+minLabel.textContent = `$${minPrice.toFixed(2)}`;
+
+// === POSITION LABELS PROPERLY ===
+// Graph height is 200px (canvas height)
+const graphH = canvas.height;
+
+maxLabel.style.top = "0px";
+minLabel.style.top = (graphH - 15) + "px";  // -15px for text height
+medLabel.style.top = (graphH / 2 - 7) + "px"; // perfectly centered
+
 
   // ---- DRAW GRAPH ----
   ctx.beginPath();
