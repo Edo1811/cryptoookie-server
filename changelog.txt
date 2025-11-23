@@ -20,5 +20,10 @@ Version Beta 1.1.2
  - Added a temporal indicator for the graph in exchange.html and pricefluctuator.js
  - Added another indicator for the price (still in exchange.html and pricefluctuator.js)
  >> Bug where two canvasses were created, solved by removing a single line of code :moyai:
- >> Another bug where the canvas WASNT CENTERED UGH, solved tho :3
+ >> Another bug where the canvas WASNT CENTERED UGH, solved tho, thanks GPT :3
  - Modified both indicators because they were ass and looked horrible so now there should be better ones, hopefully readable
+
+(23/11/25)
+Version Beta 1.1.3
+ - Removed the Debts tab (Its still there, i just deleted the button) due to an exploit that allowed players to reset the cookies price to 100$ instantly
+ >> This was especially unbalanced when paired with the buy max/sell all buttons
