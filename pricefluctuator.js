@@ -215,32 +215,69 @@ function sellCookie(amount = 1) {
   }
 }
 
-// ---------- Graph drawing ----------
+// ---------- Graph drawing ---------- - This function lately got replaced, so if there are bugs they are most likely here lol
 function drawGraph() {
   if (!ctx || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // Padding for axes
+  const padLeft = 50;
+  const padBottom = 20;
+
+  // Compute min/max
   const maxPrice = Math.max(...priceHistory);
   const minPrice = Math.min(...priceHistory);
   const range = maxPrice - minPrice || 1;
 
+  // ---- DRAW PRICE AXIS ----
+  ctx.strokeStyle = "#888";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padLeft, 0);
+  ctx.lineTo(padLeft, h - padBottom);
+  ctx.stroke();
+
+  // Labels: top price + bottom price
+  ctx.fillStyle = "#ccc";
+  ctx.font = "12px monospace";
+  ctx.fillText(`$${maxPrice.toFixed(2)}`, 5, 12);
+  ctx.fillText(`$${minPrice.toFixed(2)}`, 5, h - padBottom - 5);
+
+  // ---- DRAW TIME AXIS ----
+  ctx.beginPath();
+  ctx.moveTo(padLeft, h - padBottom);
+  ctx.lineTo(w, h - padBottom);
+  ctx.stroke();
+
+  ctx.fillText("60s ago", padLeft + 5, h - 5);
+  ctx.fillText("Now", w - 40, h - 5);
+
+  // ---- DRAW PRICE LINE ----
   ctx.beginPath();
   for (let i = 0; i < priceHistory.length; i++) {
-    const x = (i / (priceHistory.length - 1)) * canvas.width;
-    const y = canvas.height - ((priceHistory[i] - minPrice) / range) * canvas.height;
+    const x = padLeft + (i / (priceHistory.length - 1)) * (w - padLeft);
+    const y = (h - padBottom) - ((priceHistory[i] - minPrice) / range) * (h - padBottom);
+
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   }
+
   ctx.strokeStyle = "#ff9900";
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  const lastX = canvas.width;
-  const lastY = canvas.height - ((price - minPrice) / range) * canvas.height;
-  ctx.fillStyle = "#cc6600";
+  // ---- Highlight latest point ----
+  const lastX = w - 2;
+  const lastY = (h - padBottom) - ((price - minPrice) / range) * (h - padBottom);
+  ctx.fillStyle = "#ff9900";
   ctx.beginPath();
-  ctx.arc(lastX - 2, lastY, 4, 0, 2 * Math.PI);
+  ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
   ctx.fill();
 }
+
 
 // ---------- Decay & debts ----------
 function tickDecay() {
