@@ -27,3 +27,13 @@ Version Beta 1.1.2
 Version Beta 1.1.3
  - Removed the Debts tab (Its still there, i just deleted the button) due to an exploit that allowed players to reset the cookies price to 100$ instantly
  >> This was especially unbalanced when paired with the buy max/sell all buttons
+
+(26/11/25)
+Version Beta 1.1.4 is inbound and heres what i want to add:
+ - Dark mode for those hackers out there
+ - Instead of removing cookies from the wallet history ill make it so that the status changes to "dead" for a few secs and only then dissapears
+Apart from that im designing the currencies, so theres gonna be actual icons for credits (cc) and tokens (a, not yet implemented). Cookies will not have their own icon for now but once there are more cookies to choose from, there will be. The cookies that i might implement are: 
+ - $ChocC: slower fluctuations, less phases, lower alpha - more predictable. Range 100-600 (tends to stay on 200)
+ - $Macadamia: Extreme fluctuations, two phase system (like the $Cookie), randomized alpha per phase. Range 500-5000 (tends to 1500)
+ - $Orea (Oreo without copyclaim): Similar fluctuations as the $Cookie but with a slightly higher alpha and a crazy range - 20 000 to 100 000 (tends to stay 40-60k)
+ - $BitCookie: This one behaves like the $ChocC but the range is higher and wider: 500k-10M (tends to the million)
